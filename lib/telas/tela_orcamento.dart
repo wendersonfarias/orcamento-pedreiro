@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:orcamento_pedreiro/telas/orcamento_calcada.dart';
+import 'package:orcamento_pedreiro/telas/orcamento_ceramica.dart';
+import 'package:orcamento_pedreiro/telas/orcamento_forro.dart';
 import 'package:orcamento_pedreiro/telas/orcamento_muro.dart';
+import 'package:orcamento_pedreiro/telas/orcamento_telhado.dart';
 
 import '../componentes/cartao_padrao.dart';
 import '../componentes/conteudo_icone.dart';
+import 'orcamento_contrapiso.dart';
 
 class TelaOrcamento extends StatelessWidget {
   const TelaOrcamento({
@@ -45,6 +50,12 @@ class TelaOrcamento extends StatelessWidget {
                       nomeImagem: "piso",
                       descricao: "Contrapiso",
                     ),
+                    aoPressionar: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OrcamentoContrapiso()));
+                    },
                   ),
                 )
               ],
@@ -59,6 +70,12 @@ class TelaOrcamento extends StatelessWidget {
                       nomeImagem: "teto",
                       descricao: "Forro PVC",
                     ),
+                    aoPressionar: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OrcamentoForro()));
+                    },
                   ),
                 ),
                 Expanded(
@@ -67,6 +84,12 @@ class TelaOrcamento extends StatelessWidget {
                       nomeImagem: "calcada",
                       descricao: "Calçada",
                     ),
+                    aoPressionar: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OrcamentoCalcada()));
+                    },
                   ),
                 )
               ],
@@ -81,6 +104,12 @@ class TelaOrcamento extends StatelessWidget {
                       nomeImagem: "ceramica",
                       descricao: "Cerâmica",
                     ),
+                    aoPressionar: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OrcamentoCeramica()));
+                    },
                   ),
                 ),
                 Expanded(
@@ -89,6 +118,12 @@ class TelaOrcamento extends StatelessWidget {
                       nomeImagem: "cobertura",
                       descricao: "Telhado",
                     ),
+                    aoPressionar: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OrcamentoTelhado()));
+                    },
                   ),
                 )
               ],
