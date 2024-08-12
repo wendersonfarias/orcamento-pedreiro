@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:orcamento_pedreiro/telas/orcamento_calcada.dart';
-import 'package:orcamento_pedreiro/telas/orcamento_ceramica.dart';
-import 'package:orcamento_pedreiro/telas/orcamento_forro.dart';
-import 'package:orcamento_pedreiro/telas/orcamento_muro.dart';
-import 'package:orcamento_pedreiro/telas/orcamento_telhado.dart';
 
 import '../componentes/cartao_padrao.dart';
 import '../componentes/conteudo_icone.dart';
-import 'orcamento_contrapiso.dart';
 
 class TelaOrcamento extends StatelessWidget {
   const TelaOrcamento({
@@ -24,19 +18,15 @@ class TelaOrcamento extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      body: ListView(
+        children: <Widget>[
           Expanded(
             child: Row(
               children: [
                 Expanded(
                   child: CartaoPadrao(
                     aoPressionar: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => OrcamentoMuro()));
+                      Navigator.pushNamed(context, '/orcamento-muro');
                     },
                     filhoCartao: ConteudoIcone(
                       nomeImagem: "tijolo",
@@ -51,10 +41,7 @@ class TelaOrcamento extends StatelessWidget {
                       descricao: "Contrapiso",
                     ),
                     aoPressionar: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => OrcamentoContrapiso()));
+                      Navigator.pushNamed(context, '/orcamento-contrapiso');
                     },
                   ),
                 )
@@ -71,10 +58,7 @@ class TelaOrcamento extends StatelessWidget {
                       descricao: "Forro PVC",
                     ),
                     aoPressionar: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => OrcamentoForro()));
+                      Navigator.pushNamed(context, '/orcamento-forro');
                     },
                   ),
                 ),
@@ -85,10 +69,7 @@ class TelaOrcamento extends StatelessWidget {
                       descricao: "Calçada",
                     ),
                     aoPressionar: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => OrcamentoCalcada()));
+                      Navigator.pushNamed(context, '/orcamento-calcada');
                     },
                   ),
                 )
@@ -105,10 +86,7 @@ class TelaOrcamento extends StatelessWidget {
                       descricao: "Cerâmica",
                     ),
                     aoPressionar: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => OrcamentoCeramica()));
+                      Navigator.pushNamed(context, '/orcamento-ceramica');
                     },
                   ),
                 ),
@@ -119,10 +97,7 @@ class TelaOrcamento extends StatelessWidget {
                       descricao: "Telhado",
                     ),
                     aoPressionar: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => OrcamentoTelhado()));
+                      Navigator.pushNamed(context, '/orcamento-telhado');
                     },
                   ),
                 )
