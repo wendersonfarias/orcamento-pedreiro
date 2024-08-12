@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constantes.dart';
 
-const tamanhoIconeConteudoIcone = 95.0;
+const tamanhoIconeConteudoIcone = 110.0;
 
 class ConteudoIcone extends StatelessWidget {
   ConteudoIcone({required this.nomeImagem, required this.descricao});
@@ -15,13 +15,16 @@ class ConteudoIcone extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ImageIcon(
-          AssetImage('imagens/$nomeImagem.png'),
-          size: tamanhoIconeConteudoIcone,
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: ImageIcon(
+            AssetImage('imagens/$nomeImagem.png'),
+            size: tamanhoIconeConteudoIcone,
+          ),
         ),
         SizedBox(height: 15.0),
         Padding(
-          padding: EdgeInsets.all(4.0),
+          padding: EdgeInsets.all(8.0),
           child: Text(
             descricao,
             style: kDescricaoTextStyle,
