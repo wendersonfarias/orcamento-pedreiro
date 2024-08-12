@@ -3,6 +3,7 @@ import 'package:orcamento_pedreiro/database/db.dart';
 
 import '../modelos/material_modelo.dart';
 import '../modelos/orcamento_modelo.dart';
+import '../modelos/tipo_orcamento.dart';
 
 class OrcamentoContrapiso extends StatefulWidget {
   const OrcamentoContrapiso({super.key});
@@ -18,59 +19,51 @@ class _OrcamentoContrapisoState extends State<OrcamentoContrapiso> {
   final TextEditingController valorController = TextEditingController();
   final TextEditingController prazoController = TextEditingController();
 
-  String testeBanco({
-    required String cliente,
-    required double maoObra,
-    required String prazo,
-  }) {
-    setState(() async {
-      DB db = DB.instancia;
+  Future<void> _salvarOrcamento() async {
+    DB db = DB.instancia;
 
-      // Criando um orçamento
-      OrcamentoModelo newOrcamento = OrcamentoModelo(
-        tipoOrcamento: 'Orçamento de Contrapiso',
-        cliente: cliente,
-        data: DateTime.now().millisecondsSinceEpoch.toString(),
-        valorMaoObra: maoObra,
-        prazoDias: prazo,
-        statusOrcamento: 'Em andamento',
-      );
+    // Criando um orçamento
+    OrcamentoModelo newOrcamento = OrcamentoModelo(
+      areaOrcada: '1',
+      tipoOrcamento: TipoOrcamento.contrapiso,
+      cliente: clienteController.text,
+      data: DateTime.now(),
+      valorMaoObra: double.parse(valorController.text),
+      prazoDias: prazoController.text,
+    );
 
-      // Inserindo o orçamento no banco de dados
-      int orcamentoId = await db.insertOrcamento(newOrcamento.toMap());
-      newOrcamento.idOrcamento = orcamentoId;
+    // Inserindo o orçamento no banco de dados
+    int orcamentoId = await db.insertOrcamento(newOrcamento.toMap());
+    newOrcamento.idOrcamento = orcamentoId;
 
-      print('Orçamento inserido com ID: $orcamentoId');
+    print('Orçamento inserido com ID: $orcamentoId');
 
-      // Adicionando um material para o orçamento
-      MaterialModelo newMaterial = MaterialModelo(
-        nomeMaterial: 'Tijolos',
-        quantidadeMaterial: '1000',
-        idOrcamento: orcamentoId,
-      );
+    // Adicionando um material para o orçamento
+    MaterialModelo newMaterial = MaterialModelo(
+      nomeMaterial: 'Tijolos',
+      quantidade: '1000',
+      idOrcamento: orcamentoId,
+    );
 
-      int materialId = await db.insertMaterial(newMaterial.toMap());
+    //int materialId = await db.insertMaterial(newMaterial.toMap());
+    int materialId = 1;
+    print('Material inserido com ID: $materialId');
 
-      print('Material inserido com ID: $materialId');
+    // Verificando se o orçamento foi salvo
+    Map<String, dynamic>? orcamentoSalvo = await db.getOrcamento(orcamentoId);
+    if (orcamentoSalvo != null) {
+      print('Orçamento salvo: $orcamentoSalvo');
+    } else {
+      print('Orçamento não encontrado.');
+    }
 
-      // Verificando se o orçamento foi salvo
-      Map<String, dynamic>? orcamentoSalvo = await db.getOrcamento(orcamentoId);
-      if (orcamentoSalvo != null) {
-        print('Orçamento salvo: $orcamentoSalvo');
-      } else {
-        print('Orçamento não encontrado.');
-      }
-
-      // Verificando se o material foi salvo
-      Map<String, dynamic>? materialSalvo = await db.getMaterial(materialId);
-      if (materialSalvo != null) {
-        print('Material salvo: $materialSalvo');
-      } else {
-        print('Material não encontrado.');
-      }
-    });
-
-    return 'ok';
+    // Verificando se o material foi salvo
+    Map<String, dynamic>? materialSalvo = await db.getMaterial(materialId);
+    if (materialSalvo != null) {
+      print('Material salvo: $materialSalvo');
+    } else {
+      print('Material não encontrado.');
+    }
   }
 
   @override
@@ -100,16 +93,16 @@ class _OrcamentoContrapisoState extends State<OrcamentoContrapiso> {
             ),
             ElevatedButton(
               onPressed: () async {
-                String ok = await testeBanco(
-                    cliente: clienteController.text,
-                    maoObra: double.parse(valorController.text),
-                    prazo: prazoController.text);
-                print(ok);
+                // Salva o orçamento e espera a conclusão
+                await _salvarOrcamento();
 
+                // Mostra um Snackbar
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Orçamento inserido com sucesso!')),
                 );
-                Navigator.pop(context); // Voltar para a tela anterior
+
+                // Volta para a tela anterior
+                Navigator.pop(context);
               },
               child: Text('Salvar'),
             ),

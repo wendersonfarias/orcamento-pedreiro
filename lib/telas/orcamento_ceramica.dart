@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:orcamento_pedreiro/database/db.dart';
+import 'package:orcamento_pedreiro/modelos/tipo_orcamento.dart';
 
 import '../modelos/material_modelo.dart';
 import '../modelos/orcamento_modelo.dart';
@@ -28,12 +29,12 @@ class _OrcamentoCeramicaState extends State<OrcamentoCeramica> {
 
       // Criando um orçamento
       OrcamentoModelo newOrcamento = OrcamentoModelo(
-        tipoOrcamento: 'Orçamento de Ceramica',
+        areaOrcada: '1',
+        tipoOrcamento: TipoOrcamento.ceramica,
         cliente: cliente,
-        data: DateTime.now().millisecondsSinceEpoch.toString(),
+        data: DateTime.now(),
         valorMaoObra: maoObra,
         prazoDias: prazo,
-        statusOrcamento: 'Em andamento',
       );
 
       // Inserindo o orçamento no banco de dados
@@ -45,12 +46,12 @@ class _OrcamentoCeramicaState extends State<OrcamentoCeramica> {
       // Adicionando um material para o orçamento
       MaterialModelo newMaterial = MaterialModelo(
         nomeMaterial: 'Tijolos',
-        quantidadeMaterial: '1000',
+        quantidade: '1000',
         idOrcamento: orcamentoId,
       );
 
-      int materialId = await db.insertMaterial(newMaterial.toMap());
-
+      //int materialId = await db.insertMaterial(newMaterial.toMap());
+      int materialId = 1;
       print('Material inserido com ID: $materialId');
 
       // Verificando se o orçamento foi salvo
@@ -109,7 +110,8 @@ class _OrcamentoCeramicaState extends State<OrcamentoCeramica> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Orçamento inserido com sucesso!')),
                 );
-                Navigator.pop(context); // Voltar para a tela anterior
+                Navigator.pushNamed(
+                    context, '/'); // Voltar para a tela anterior
               },
               child: Text('Salvar'),
             ),

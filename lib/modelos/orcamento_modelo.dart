@@ -1,11 +1,13 @@
+import 'package:orcamento_pedreiro/modelos/tipo_orcamento.dart';
+
 class OrcamentoModelo {
   int? idOrcamento;
-  String tipoOrcamento;
+  TipoOrcamento tipoOrcamento;
   String cliente;
-  String data;
+  DateTime data;
   double valorMaoObra;
   String prazoDias;
-  String statusOrcamento;
+  String areaOrcada;
 
   OrcamentoModelo({
     this.idOrcamento,
@@ -14,18 +16,20 @@ class OrcamentoModelo {
     required this.data,
     required this.valorMaoObra,
     required this.prazoDias,
-    required this.statusOrcamento,
+    required this.areaOrcada,
   });
 // Converte um Map para um objeto OrcamentoModelo
   factory OrcamentoModelo.fromMap(Map<String, dynamic> map) {
     return OrcamentoModelo(
       idOrcamento: map['id_orcamento'],
-      tipoOrcamento: map['tipo_orcamento'],
+      tipoOrcamento: TipoOrcamento.values.firstWhere(
+        (e) => e.toString() == 'TipoOrcamento.${map['tipo_orcamento']}',
+      ),
       cliente: map['cliente'],
-      data: map['data'],
+      data: DateTime.fromMillisecondsSinceEpoch(map['data']),
       valorMaoObra: map['valor_mao_obra'],
       prazoDias: map['prazo_dias'],
-      statusOrcamento: map['status_orcamento'],
+      areaOrcada: map['area_orcada'],
     );
   }
 
@@ -33,12 +37,13 @@ class OrcamentoModelo {
   Map<String, dynamic> toMap() {
     return {
       'id_orcamento': idOrcamento,
-      'tipo_orcamento': tipoOrcamento,
+      'tipo_orcamento':
+          tipoOrcamento.toString().split('.').last, // Converte enum para String
       'cliente': cliente,
-      'data': data,
+      'data': data.millisecondsSinceEpoch, // Armazenando timestamp
       'valor_mao_obra': valorMaoObra,
       'prazo_dias': prazoDias,
-      'status_orcamento': statusOrcamento,
+      'area_orcada': areaOrcada,
     };
   }
 }
