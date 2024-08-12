@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/orcamento_pedreiro.iml" filepath="$PROJECT_DIR$/orcamento_pedreiro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/orcamento_pedreiro_android.iml" filepath="$PROJECT_DIR$/android/orcamento_pedreiro_android.iml" />
     </modules>
   </component>
 </project>
