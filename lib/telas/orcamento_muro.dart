@@ -113,8 +113,6 @@ class _OrcamentoMuroState extends State<OrcamentoMuro> {
         prazoDias: prazoController.text,
         areaOrcada: areaOrcadaController.text);
 
-    print(novoOrcamento.toMap());
-
     // Inserindo o orçamento no banco de dados
     int orcamentoId = await db.inserirOrcamento(novoOrcamento);
     novoOrcamento.idOrcamento = orcamentoId;
@@ -123,39 +121,8 @@ class _OrcamentoMuroState extends State<OrcamentoMuro> {
 
     List<MaterialModelo> listaMateriais =
         converterParaMaterialModelo(_materiais, orcamentoId);
+
     await db.inserirListaMateriais(listaMateriais);
-
-    /*
-    // Adicionando um material para o orçamento
-    MaterialModelo newMaterial = MaterialModelo(
-      nomeMaterial: 'Tijolos',
-      quantidade: '1000',
-      idOrcamento: orcamentoId,
-    );
-
-    //int materialId = await db.insertMaterial(newMaterial.toMap());
-    int materialId = 1;
-
-    print('Material inserido com ID: $materialId');
-    */
-    // Verificando se o orçamento foi salvo
-    OrcamentoModelo? orcamentoSalvo =
-        await db.buscarOrcamentoPorId(orcamentoId);
-    if (orcamentoSalvo != null) {
-      print(orcamentoSalvo.toMap());
-    } else {
-      print('Orçamento não encontrado.');
-    }
-
-    // Busca os materiais pelo ID do orçamento
-    List<MaterialModelo> materiais =
-        await db.buscarMateriaisOrcamentoId(orcamentoId);
-
-    // Exibe os materiais ou faça o que for necessário com eles
-    for (var material in materiais) {
-      print(
-          'Material: ${material.nomeMaterial}, Quantidade: ${material.quantidade}');
-    }
   }
 
   @override
@@ -177,11 +144,17 @@ class _OrcamentoMuroState extends State<OrcamentoMuro> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(
+                    height: 25,
+                  ),
                   TextFormField(
                     controller: clienteController,
                     decoration: InputDecoration(
                       hintText: 'Informe o nome do cliente',
                       labelText: 'Nome do cliente',
+                      labelStyle: const TextStyle(
+                        fontSize: 21,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.0),
                       ),
@@ -195,6 +168,9 @@ class _OrcamentoMuroState extends State<OrcamentoMuro> {
                     decoration: InputDecoration(
                       hintText: 'Informe o prazo em dias',
                       labelText: 'Prazo (dias)',
+                      labelStyle: const TextStyle(
+                        fontSize: 21,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.0),
                       ),
@@ -210,6 +186,9 @@ class _OrcamentoMuroState extends State<OrcamentoMuro> {
                     decoration: InputDecoration(
                       hintText: 'Informe os m² do muro',
                       labelText: 'Área Orçada (m²)',
+                      labelStyle: const TextStyle(
+                        fontSize: 21,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.0),
                       ),
@@ -225,11 +204,14 @@ class _OrcamentoMuroState extends State<OrcamentoMuro> {
                     decoration: InputDecoration(
                       hintText: 'Valor em reais',
                       labelText: 'Custo da Mão de Obra (m²)',
+                      labelStyle: const TextStyle(
+                        fontSize: 21,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.0),
                       ),
                       prefixIcon: const Icon(Icons.monetization_on_outlined),
-                      prefixText: 'R\$',
+                      prefixText: 'R\$ ',
                       suffix: const Text(
                         "reais",
                         style: TextStyle(fontSize: 14),
