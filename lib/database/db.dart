@@ -237,6 +237,21 @@ class DB {
     );
   }
 
+  Future<void> atualizarListaMateriais(List<MaterialModelo> materiais) async {
+    final db = await database;
+    Batch batch = db.batch();
+
+    for (var material in materiais) {
+      batch.insert(
+        'material',
+        material.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    await batch.commit();
+  }
+
   Future<int> deleteMaterial(int id) async {
     Database db = await database;
     return await db.delete(
