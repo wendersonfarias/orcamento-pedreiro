@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:orcamento_pedreiro/database/db.dart';
+import 'package:orcamento_pedreiro/services/pdf_service.dart';
 
 import '../modelos/material_modelo.dart';
 import '../modelos/orcamento_modelo.dart';
@@ -16,26 +17,19 @@ class TelaDetalhesOrcamento extends StatefulWidget {
 }
 
 class _TelaDetalhesOrcamentoState extends State<TelaDetalhesOrcamento> {
-  late TextEditingController _clienteController;
-  late TextEditingController _valorController;
-  late TextEditingController _prazoController;
-  late TextEditingController _areaOrcadaController;
-  late DateTime _data;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final PdfService pdfService = new PdfService();
+  String tipoOrcamento = '';
 
   List<MaterialModelo> _materiais = [];
+  final NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
+  final DateFormat dateFormat =
+      DateFormat('dd/MM/yyyy'); // Define o formato de data
 
   @override
   void initState() {
     super.initState();
-    _clienteController = TextEditingController(text: widget.orcamento.cliente);
-    _valorController =
-        TextEditingController(text: widget.orcamento.valorMaoObra.toString());
-    _prazoController = TextEditingController(text: widget.orcamento.prazoDias);
-    _areaOrcadaController =
-        TextEditingController(text: widget.orcamento.areaOrcada);
-    _data = widget.orcamento.data;
-
+    tipoOrcamento =
+        widget.orcamento.tipoOrcamento.toString().split('.').last.toUpperCase();
     _carregarMateriais().then((materiais) {
       setState(() {
         _materiais = materiais;
@@ -43,95 +37,11 @@ class _TelaDetalhesOrcamentoState extends State<TelaDetalhesOrcamento> {
     });
   }
 
-  @override
-  void dispose() {
-    _clienteController.dispose();
-    _valorController.dispose();
-    _prazoController.dispose();
-    _areaOrcadaController.dispose();
-    super.dispose();
-  }
-
-  String? _validarCliente(valor) {
-    if (valor!.isEmpty) {
-      return "Informe o Nome do cliente";
-    }
-    return null;
-  }
-
-  void validarOrcamento() {
-    if (_formKey.currentState!.validate()) {
-      _salvarOrcamento();
-    }
-  }
-
   Future<List<MaterialModelo>> _carregarMateriais() async {
     DB db = DB.instancia;
     List<MaterialModelo> materiais =
         await db.buscarMateriaisOrcamentoId(widget.orcamento.idOrcamento!);
-
     return materiais;
-  }
-
-  Future<void> _salvarOrcamento() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    final orcamentoAtualizado = OrcamentoModelo(
-      idOrcamento: widget.orcamento.idOrcamento,
-      tipoOrcamento: widget.orcamento.tipoOrcamento,
-      cliente: _clienteController.text,
-      data: _data,
-      valorMaoObra: double.tryParse(_valorController.text) ?? 0.0,
-      prazoDias: _prazoController.text,
-      areaOrcada: _areaOrcadaController.text,
-    );
-
-    try {
-      DB db = DB.instancia;
-      await db.updateOrcamento(orcamentoAtualizado.toMap());
-
-      await db.atualizarListaMateriais(_materiais);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Orçamento atualizado com sucesso!')),
-      );
-
-      Navigator.of(context).pop(true);
-    } catch (e) {
-      print('Erro ao atualizar orçamento: $e');
-    }
-  }
-
-  String? _validarCampo(String? valor) {
-    if (valor == null || valor.isEmpty) {
-      return 'Campo obrigatório';
-    }
-    final number = double.tryParse(valor);
-    if (number == null || number <= 0) {
-      return 'Insira um valor maior que 0';
-    }
-    return null;
-  }
-
-  void _adicionarMaterial() {
-    setState(() {
-      // Adiciona um material vazio
-      _materiais.add(MaterialModelo(
-        nomeMaterial: '',
-        quantidade: '0',
-        idOrcamento: widget.orcamento.idOrcamento!,
-      ));
-    });
-  }
-
-  void _removerUltimoMaterial() {
-    setState(() {
-      if (_materiais.isNotEmpty) {
-        _materiais.removeLast(); // Remove o último item da lista
-      }
-    });
   }
 
   @override
@@ -139,232 +49,217 @@ class _TelaDetalhesOrcamentoState extends State<TelaDetalhesOrcamento> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalhes do Orçamento'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: validarOrcamento,
-          ),
-        ],
+        backgroundColor: Colors.blueGrey,
+        elevation: 5,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: <Widget>[
-            Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  TextFormField(
-                    controller: _clienteController,
-                    decoration: InputDecoration(
-                      hintText: 'Informe o nome do cliente',
-                      labelText: 'Nome do Cliente',
-                      labelStyle: const TextStyle(
-                        fontSize: 21,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      prefixIcon: const Icon(Icons.person),
-                    ),
-                    validator: _validarCliente,
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextFormField(
-                    controller: _prazoController,
-                    decoration: InputDecoration(
-                      hintText: 'Informe o prazo em dias',
-                      labelText: 'Prazo (dias)',
-                      labelStyle: TextStyle(
-                        fontSize: 21,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      prefixIcon: const Icon(Icons.today),
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: _validarCampo,
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextFormField(
-                    controller: _areaOrcadaController,
-                    decoration: InputDecoration(
-                      hintText: 'Informe a área orçada (m²)',
-                      labelText: 'Área Orçada (m²)',
-                      labelStyle: TextStyle(
-                        fontSize: 21,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      prefixIcon: const Icon(Icons.square_foot),
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: _validarCampo,
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextFormField(
-                    controller: _valorController,
-                    decoration: InputDecoration(
-                      hintText: 'Valor em reais',
-                      labelText: 'Custo da Mão de Obra (R\$)',
-                      labelStyle: TextStyle(
-                        fontSize: 21,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      prefixIcon: const Icon(Icons.monetization_on_outlined),
-                      prefixText: 'R\$',
-                      suffix: const Text(
-                        'reais',
-                        style: TextStyle(fontSize: 14),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              //color: Colors.,
+              elevation: 5,
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cliente: ${widget.orcamento.cliente.toUpperCase()}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        color: Colors.white,
                       ),
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: _validarCampo,
+                    SizedBox(height: 8.0),
+                    Text(
+                      'Orçamento: ${tipoOrcamento}',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 18),
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      'Valor mão de obra: ${real.format(widget.orcamento.valorMaoObra * double.parse(widget.orcamento.areaOrcada))}',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    Text(
+                      'PRAZO: ${widget.orcamento.prazoDias} DIAS',
+                      style: TextStyle(color: Colors.blueGrey, fontSize: 18),
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      'Data do orçamento: ${dateFormat.format(widget.orcamento.data)}'
+                          .toUpperCase(),
+                      style: TextStyle(color: Colors.blueGrey, fontSize: 18),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 25.0),
+            const Center(
+              child: Text(
+                "Lista de Materiais",
+                style: TextStyle(fontSize: 25),
+              ),
+            ),
+            Column(
+              children: _materiais.map((material) {
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 25.0),
-                  const Center(
-                      child: Text(
-                    "Lista de Materiais",
-                    style: TextStyle(fontSize: 25),
-                  )),
-                  Column(
-                    children: _materiais.map((material) {
-                      return Card(
-                        margin: EdgeInsets.all(4),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15.0),
-                          child: ListTile(
-                            title: TextFormField(
-                              initialValue: material.nomeMaterial,
-                              decoration: const InputDecoration(
-                                hintText: 'Digite o nome do material',
-                                labelText: 'Material',
-                                labelStyle: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.lightBlueAccent,
-                                ),
-                              ),
-                              onChanged: (valor) {
-                                setState(() {
-                                  material.nomeMaterial = valor;
-                                });
-                              },
-                            ),
-                            subtitle: TextFormField(
-                              initialValue: material.quantidade.toString(),
-                              decoration: const InputDecoration(
-                                hintText: 'Digite a quantidade',
-                                labelText: 'Quantidade',
-                                labelStyle: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.lightBlueAccent,
-                                ),
-                              ),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'[\d.]'))
-                              ],
-                              onChanged: (valor) {
-                                setState(() {
-                                  material.quantidade = valor ?? '0.0';
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  if (_materiais.isNotEmpty) const SizedBox(height: 50.0),
-                  if (_materiais.isNotEmpty)
-                    SizedBox(
-                      height: 75,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                        ),
-                        onPressed: _removerUltimoMaterial,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.playlist_remove, color: Colors.white),
-                            Text(
-                              'REMOVER ÚLTIMO MATERIAL',
-                              style:
-                                  TextStyle(fontSize: 15, color: Colors.white),
-                            ),
-                          ],
+                  elevation: 3,
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: ListTile(
+                      title: Text(
+                        material.nomeMaterial,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.cyanAccent,
                         ),
                       ),
-                    ),
-                  //const SizedBox(height: 16.0),
-                  if (_materiais.isNotEmpty) const SizedBox(height: 30.0),
-                  SizedBox(
-                    height: 75,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                      ),
-                      onPressed: _adicionarMaterial,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add_circle_sharp,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            'ADICIONAR MATERIAL',
-                            style: TextStyle(fontSize: 15, color: Colors.white),
-                          ),
-                        ],
+                      subtitle: Text(
+                        'Quantidade: ${double.parse(material.quantidade).toStringAsFixed(0)}',
+                        style: TextStyle(fontSize: 20, color: Colors.green),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30.0),
-                  SizedBox(
-                    height: 75,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                      ),
-                      onPressed: validarOrcamento,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.save,
-                            color: Colors.white,
-                          ),
-                          Text(
-                            'ATUALIZAR ORÇAMENTO',
-                            style: TextStyle(fontSize: 15, color: Colors.white),
-                          ),
-                        ],
-                      ),
+                );
+              }).toList(),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              height: 75,
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                ),
+                onPressed: () async {
+                  final data =
+                      await pdfService.gerarPDF(widget.orcamento, _materiais);
+                  pdfService.salvarAbrir('Orçamento-$tipoOrcamento', data);
+                },
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.picture_as_pdf,
+                      color: Colors.white,
                     ),
-                  ),
-                ],
+                    Text(
+                      'Gerar PDF e Abrir',
+                      style: TextStyle(fontSize: 15, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            SizedBox(
+              height: 75,
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+                onPressed: () async {
+                  final data =
+                      await pdfService.gerarPDF(widget.orcamento, _materiais);
+                  pdfService.compartilharPDF('Orçamento-$tipoOrcamento', data);
+                },
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ImageIcon(
+                      AssetImage('imagens/whatsapp.png'),
+                      size: 37,
+                      color: Colors.white,
+                    ),
+                    Text(
+                      ' Mandar pelo Whatsapp',
+                      style: TextStyle(fontSize: 15, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            SizedBox(
+              height: 75,
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+                onPressed: () {
+                  _showDeleteConfirmationDialog(context);
+                },
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                    Text(
+                      'Deletar Orçamento',
+                      style: TextStyle(fontSize: 15, color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Exclusão'),
+          content:
+              const Text('Você tem certeza de que deseja apagar este orçamento '
+                  'e os materiais desse orçamento?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await DB.instancia
+                    .deleteOrcamentoComMateriais(widget.orcamento.idOrcamento!);
+                Navigator.of(context).pop(); // Fecha o diálogo
+                Navigator.of(context).pop(); // Volta para a tela anterior
+              },
+              child: const Text('Deletar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
