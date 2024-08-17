@@ -67,7 +67,7 @@ class _OrcamentoForroState extends State<OrcamentoForro> {
       setState(() {
         _materiais.addAll([
           MaterialItem(
-              nomeMaterial: "PEÇAS DE 6 MT DE FORRO",
+              nomeMaterial: "PEÇAS DE 6 METROS DE FORRO PVC",
               quantidade: (5 * metroQuadrados) / 6),
           MaterialItem(
               nomeMaterial: "PARAFUSO DE FIXAR FORRO",
