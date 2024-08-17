@@ -260,4 +260,27 @@ class DB {
       whereArgs: [id],
     );
   }
+
+  Future<void> deleteMateriaisPorOrcamentoId(int orcamentoId) async {
+    Database db = await database;
+    await db.delete(
+      'material',
+      where: 'id_orcamento = ?',
+      whereArgs: [orcamentoId],
+    );
+  }
+
+  Future<void> deleteOrcamentoComMateriais(int id) async {
+    Database db = await database;
+
+    // Deletar materiais associados ao orçamento
+    await deleteMateriaisPorOrcamentoId(id);
+
+    // Deletar o orçamento
+    await db.delete(
+      'orcamento',
+      where: 'id_orcamento = ?',
+      whereArgs: [id],
+    );
+  }
 }
